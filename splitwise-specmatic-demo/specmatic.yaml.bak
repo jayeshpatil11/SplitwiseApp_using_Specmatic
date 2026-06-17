@@ -1,0 +1,13 @@
+version: 3
+
+systemUnderTest:
+  service:
+    $ref: "#/components/services/expenseService"
+
+components:
+  services:
+    expenseService:
+      definitions:
+        - definition:
+            specs:
+              - openapi/expense-sharing-api.yaml

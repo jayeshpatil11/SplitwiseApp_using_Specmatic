@@ -1,0 +1,314 @@
+openapi: 3.0.0
+
+info:
+  title: Expense Sharing API
+  version: 1.0.0
+
+paths:
+  /groups:
+    post:
+      summary: Create Group
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateGroupRequest"
+            examples:
+              createGroup:
+                value:
+                  name: Goa Trip
+
+      responses:
+        "201":
+          description: Group Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GroupResponse"
+              examples:
+                success:
+                  value:
+                    groupId: 1
+                    name: Goa Trip
+
+  /groups/{groupId}:
+    get:
+      summary: Get Group
+
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: integer
+
+          examples:
+            success:
+              value: 1
+
+            notFound:
+              value: 99999
+
+      responses:
+        "200":
+          description: Group Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GroupResponse"
+              examples:
+                success:
+                  value:
+                    groupId: 1
+                    name: Goa Trip
+
+        "404":
+          description: Group Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                notFound:
+                  value:
+                    detail: Group not found
+
+  /expenses:
+    post:
+      summary: Add Expense
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddExpenseRequest"
+            examples:
+              addExpense:
+                value:
+                  groupId: 1
+                  amount: 1500.50
+                  paidBy: 101
+
+      responses:
+        "201":
+          description: Expense Added
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExpenseResponse"
+              examples:
+                success:
+                  value:
+                    expenseId: 1
+                    status: CREATED
+
+    get:
+      summary: Get Expenses
+
+      responses:
+        "200":
+          description: Expense List
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Expense"
+              examples:
+                expenseList:
+                  value:
+                    - expenseId: 1
+                      groupId: 1
+                      amount: 1500.50
+                      paidBy: 101
+
+  /balances/{userId}:
+    get:
+      summary: View Balance
+
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+            example: 101
+
+      responses:
+        "200":
+          description: Balance Details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BalanceResponse"
+              examples:
+                balance:
+                  value:
+                    userId: 101
+                    totalOwed: 500
+                    totalReceivable: 1200
+
+  /settlements:
+    post:
+      summary: Create Settlement
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SettlementRequest"
+            examples:
+              settlement:
+                value:
+                  fromUser: 101
+                  toUser: 102
+                  amount: 500
+
+      responses:
+        "201":
+          description: Settlement Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SettlementResponse"
+              examples:
+                success:
+                  value:
+                    settlementId: 1
+                    status: SUCCESS
+
+components:
+  schemas:
+    CreateGroupRequest:
+      type: object
+      required:
+        - name
+
+      properties:
+        name:
+          type: string
+          example: Goa Trip
+
+    GroupResponse:
+      type: object
+
+      properties:
+        groupId:
+          type: integer
+          example: 1
+
+        name:
+          type: string
+          example: Goa Trip
+
+    AddExpenseRequest:
+      type: object
+
+      required:
+        - groupId
+        - amount
+        - paidBy
+
+      properties:
+        groupId:
+          type: integer
+          example: 1
+
+        amount:
+          type: number
+          example: 1500.50
+
+        paidBy:
+          type: integer
+          example: 101
+
+    ExpenseResponse:
+      type: object
+
+      properties:
+        expenseId:
+          type: integer
+          example: 1
+
+        status:
+          type: string
+          example: CREATED
+
+    BalanceResponse:
+      type: object
+
+      properties:
+        userId:
+          type: integer
+          example: 101
+
+        totalOwed:
+          type: number
+          example: 500.00
+
+        totalReceivable:
+          type: number
+          example: 1200.00
+
+    SettlementRequest:
+      type: object
+
+      required:
+        - fromUser
+        - toUser
+        - amount
+
+      properties:
+        fromUser:
+          type: integer
+          example: 101
+
+        toUser:
+          type: integer
+          example: 102
+
+        amount:
+          type: number
+          example: 500.00
+
+    SettlementResponse:
+      type: object
+
+      properties:
+        settlementId:
+          type: integer
+          example: 1
+
+        status:
+          type: string
+          example: SUCCESS
+
+    ErrorResponse:
+      type: object
+
+      properties:
+        detail:
+          type: string
+
+      example:
+        detail: Group not found
+
+    Expense:
+      type: object
+
+      properties:
+        expenseId:
+          type: integer
+
+        groupId:
+          type: integer
+
+        amount:
+          type: number
+
+        paidBy:
+          type: integer
