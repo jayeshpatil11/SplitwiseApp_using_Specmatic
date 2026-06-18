@@ -1,0 +1,50 @@
+name: Specmatic Contract Tests
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+  pull_request:
+    branches:
+      - main
+      - master
+
+jobs:
+  contract-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install Backend Dependencies
+        run: |
+          cd backend
+          pip install -r requirements.txt
+
+      - name: Start FastAPI Server
+        run: |
+          cd backend
+          nohup uvicorn main:app --host 0.0.0.0 --port 8000 &
+          sleep 15
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Download Specmatic
+        run: |
+          curl -L https://repo1.maven.org/maven2/io/specmatic/specmatic-executable/latest/specmatic-executable-latest.jar -o specmatic.jar
+
+      - name: Run Specmatic Tests
+        run: |
+          java -jar specmatic.jar test
